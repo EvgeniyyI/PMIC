@@ -1,6 +1,5 @@
 package com.example.helloapp
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -20,12 +19,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -123,57 +125,41 @@ fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifi
 
 @Composable
 fun Home(modifier: Modifier = Modifier) {
+    val myName = stringResource(id = R.string.my_name)
+    var textValue by rememberSaveable { mutableStateOf("") }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xAB2196F3)),
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
-        val myName = stringResource(id = R.string.my_name)
-        var otherName by remember { mutableStateOf("") }
-        var textValue by remember { mutableStateOf("") }
         Text(
-            text = "Hello $otherName!",
-            modifier = modifier.padding(32.dp, top = 48.dp, bottom = 32.dp),
-            fontSize = 32.sp
+            text = textValue
         )
-        Image(
-            painter = painterResource(id = R.drawable.bsuir),
-            contentDescription = "Hello BSUIR Image",
-            modifier = Modifier.size(150.dp)
-        )
-        TextField(
-            value = textValue,
-            onValueChange = { textValue = it },
-            label = { Text(text = "Введите имя") },
-            placeholder = { Text(text = "Имя") },
-            modifier = modifier.padding(8.dp)
-        )
-        Button(
-            onClick =
-            {
-                otherName = textValue
+        Box(
+            modifier = Modifier
+                .width(300.dp)
+                .padding(16.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = { textValue = myName },
+                    modifier = Modifier.weight(3f)
+                ) {
+                    Text(text = "Вывести имя")
+                }
+                Button(
+                    onClick = { textValue = "" },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(text = "X")
+                }
             }
-        ) {
-            Text(text = "Вывести имя")
-        }
-        Button(
-            onClick =
-            {
-                textValue = myName
-            },
-            modifier = modifier.padding(8.dp)
-        ) {
-            Text(text = "Моё имя")
-        }
-        Button(
-            onClick = {
-                textValue = ""
-            },
-            modifier = modifier.padding(8.dp)
-        ) {
-            Text(text = "Очистить")
         }
     }
 }
@@ -228,7 +214,7 @@ fun Lists(modifier: Modifier = Modifier) {
 
 @Composable
 fun Picture(modifier: Modifier = Modifier) {
-    var rotated by remember { mutableStateOf(false) }
+    var rotated by rememberSaveable { mutableStateOf(false) }
     val angle: Float by animateFloatAsState(
         targetValue = if (rotated) 360f else 0f,
         animationSpec = tween(4000)
@@ -255,7 +241,7 @@ fun Picture(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = { rotated = !rotated },
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(10.dp, bottom = 32.dp)
         ) {
             Text(text = "Повернуть")
         }
@@ -264,9 +250,9 @@ fun Picture(modifier: Modifier = Modifier) {
 
 @Composable
 fun CameraScreen(modifier: Modifier = Modifier) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var hasImage by remember { mutableStateOf(false) }
-    var currentUri by remember { mutableStateOf<Uri?>(null) }
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+    var hasImage by rememberSaveable { mutableStateOf(false) }
+    var currentUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(), onResult = { uri: Uri? ->
@@ -299,9 +285,11 @@ fun CameraScreen(modifier: Modifier = Modifier) {
     )
 
     Column(modifier = modifier.fillMaxSize()) {
-        Box(modifier = Modifier
-            .weight(1f)
-            .padding(top = 48.dp)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 64.dp, start = 16.dp, end = 16.dp)
+        ) {
             if (hasImage && imageUri != null) {
                 AsyncImage(
                     model = imageUri,
@@ -312,7 +300,7 @@ fun CameraScreen(modifier: Modifier = Modifier) {
         }
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(16.dp, bottom = 32.dp)
                 .align(Alignment.CenterHorizontally)
                 .weight(1f, fill = false),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -324,7 +312,7 @@ fun CameraScreen(modifier: Modifier = Modifier) {
                 Text(text = "Выбрать изображение из галереи")
             }
             Button(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 onClick = {
                     currentUri = ComposeFileProvider.getImageUri(context)
                     val permissionCheckResult = ContextCompat.checkSelfPermission(
